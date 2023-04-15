@@ -1,4 +1,4 @@
-#   install.packages("tidyverse")
+# install.packages("tidyverse")
 
 install.packages("scatterplot3d")
 
@@ -37,7 +37,7 @@ ggplot(data=iris) +
 grafico_especies <- ggplot(data=iris) +
   geom_point(mapping=aes(x=Sepal.Width,y=Sepal.Length,color=Species),
              ) 
-
+  
 grafico_especies
 
 ggsave("mi_propia_grafica.pdf",device="pdf")
@@ -45,16 +45,31 @@ ggsave("mi_propia_grafica.pdf",device="pdf")
 ?ggsave()
 
 
+##################################################
+
+iris %>% names()
+
+sturges = as.integer(1+log2(150))
+
 ggplot(data=iris) +
-  geom_histogram(mapping=aes(x=Sepal.Width),
+  geom_histogram(mapping=aes(x=Petal.Length),
                  fill="red",
-                 color="white")
+                 color="darkblue") +
+  labs(title = "Mi histograma",
+       subtitle = "Basado en Iris") +
+  theme(
+    panel.background = element_rect("black"), 
+    panel.grid = element_blank(),
+  )
+
+?theme
 
 ggplot(data=iris) +
   geom_histogram(mapping=aes(x=Sepal.Width,
                              fill=Species),
                  alpha=0.5,
-                 color="white")
+                 color="white") + 
+  scale_fill_manual(values=c("darkblue","blue","orange"))
 
 ggplot(data=iris) +
   geom_histogram(mapping=aes(x=Sepal.Width,
@@ -62,7 +77,7 @@ ggplot(data=iris) +
                  fill="red",
                  color="black") +
   geom_density(mapping=aes(x=Sepal.Width),
-               fill="red",
+               fill="yellow",
                color="black",
                alpha=0.5)
 
@@ -75,6 +90,48 @@ ggplot(data=iris) +
                color="black",
                alpha=0.5)
 
+ggplot(data=iris) +
+  geom_density(mapping=aes(x=Sepal.Width,
+                           fill=Species),
+               color="black",
+               alpha=0.5)
+
+##### faceteado
+
+### Convertir la tabla iris a formato ordenado (tidy o largo)
+iris_ordenado = iris %>% gather(key="Medida",value="Valor",c(1:4))
+
+ggplot(data=iris_ordenado) +
+  geom_histogram(mapping=aes(x=Valor),
+                 fill="red",
+                 color="darkblue") +
+  labs(title = "Mi histograma",
+       subtitle = "Basado en Iris") +
+  theme(
+    panel.background = element_rect("black"), 
+    panel.grid = element_blank(),
+  ) +
+  facet_wrap(~Medida)
+
+########### Histograma de longitud de sépalo utilizando
+########### el formato largo
+
+### Esto significa filtrar
+iris_ordenado %>% filter(Medida == "Sepal.Length")
+
+iris_ordenado %>% filter(Medida=="Sepal.Length") %>%
+ggplot() +
+  geom_histogram(mapping=aes(x=Valor),
+                 fill="red",
+                 color="darkblue") +
+  labs(title = "Mi histograma",
+       subtitle = "Basado en Iris") +
+  theme(
+    panel.background = element_rect("black"), 
+    panel.grid = element_blank(),
+  ) 
+
+
 #########################################################################
 ###############   Densidades conjuntas de dos columnas   ################
 #########################################################################
@@ -82,6 +139,9 @@ ggplot(data=iris) +
 ########### Curvas de contorno
 
 iris_setos_versi = iris %>% filter(Species=="setosa" | Species=="versicolor")
+
+iris_setos_versi
+
 
 m <- ggplot(data=iris_setos_versi) +
   stat_density_2d(mapping=aes(x=Sepal.Width,
@@ -101,9 +161,34 @@ m <- ggplot(data=iris_setos_versi) +
 
 m  
 
+
+iris_setos_virgi = iris %>% filter(Species=="setosa" | Species=="virginica")
+
+t <- ggplot(data=iris_setos_virgi) +
+  stat_density_2d(mapping=aes(x=Sepal.Width,
+                              y=Sepal.Length,
+                              fill=..level..,
+                              group=Species,
+                              color=Species),
+                  geom="polygon",
+                  show.legend = FALSE) +
+  geom_density_2d(mapping=aes(x=Sepal.Width,
+                              y=Sepal.Length,
+                              color=Species),
+                  show.legend=FALSE) +
+  ylim(4,8.2) +
+  theme(panel.background = element_rect("white"),
+        panel.grid = element_line(color="darkgrey",size=0.1))
+
+t
+
 ########### Tridimensional  
 
-plot_gg(m)
+s = plot_gg(m)
+
+s
+
+plot_gg(t)
 
 #########################################################################
 #########################   Nubes de puntos   ###########################
