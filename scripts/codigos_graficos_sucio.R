@@ -1,6 +1,6 @@
 # install.packages("tidyverse")
 
-install.packages("scatterplot3d")
+#install.packages("scatterplot3d")
 
 library(tidyverse) # funciones esenciales para análisis de datos
 library(rayshader) # graficador especial para mapas en 3D
@@ -19,7 +19,6 @@ iris %>% names()
 #########################################################################
 
 setwd("C:\\Users\\hp master\\Documents\\SciData\\Est_mult_23")
-
 getwd()
 
 iris <- read.csv("iris.csv")
@@ -195,9 +194,11 @@ plot_gg(t)
 #########################################################################
 
 ########### Nube de puntos sin separar en especies
-
-p = ggplot(data=iris) +
+# Operadores de asignación: <- y =
+p <- ggplot(data=iris) +
   geom_point(mapping=aes(x=Sepal.Width,y=Sepal.Length),color="red")
+
+ggsave("mi_nube.png")
 
 ########### Nube de puntos sin separar en especies con histogramas y densidades
 
@@ -205,19 +206,30 @@ ggMarginal(p,type="histogram",fill="red")
 ggMarginal(p,type="densigram",fill="red")
 ggMarginal(p,fill="red")
 
+r
+
+### Sin nombrar gráficos
+
+ggMarginal(ggplot(data=iris) +
+             geom_point(mapping=aes(x=Sepal.Width,y=Sepal.Length),color="darkblue"),
+           fill="red")
+
 ########### Nube de puntos separando en especies
 
 r = ggplot(data=iris) +
-  geom_point(mapping=aes(x=Sepal.Width,y=Sepal.Length,color=Species))
+  geom_point(mapping=aes(x=Sepal.Width,y=Sepal.Length,color=Species)) +
+  scale_color_manual(values = c("blue","red","orange"))
 
 ########### Nube de puntos separando en especies con histogramas y densidades
 
-ggMarginal(r,type="histogram",groupColor=TRUE,groupFill = TRUE,alpha=0.5)
+ggMarginal(r,type="histogram",groupFill = TRUE,alpha=0.5)
 ggMarginal(r,type="densigram",groupFill = TRUE,alpha=0.5)
 ggMarginal(r,groupFill = TRUE,alpha=0.5)
 
 
 ########### Matriz de nubes de puntos sin información extra
+
+View(iris)
 
 ggpairs(data=iris,
         mapping = aes(color=Species,alpha=0.01),
@@ -225,7 +237,8 @@ ggpairs(data=iris,
         upper = list(continuous = "points")) +
   theme(panel.background = element_rect("#202020"),
         panel.grid = element_line("blue"),
-        axis.title = element_blank())
+        #axis.title = element_blank()
+        )
 
 ########### Matriz de nubes de puntos con información extra
 
@@ -240,8 +253,14 @@ ggpairs(data=iris,
 
 colores = c("blue","green","red")
 colores = colores[as.factor(iris$Species)]
-scatterplot3d(iris[,c(2,1,3)],pch=19,color=colores)
 
+scatterplot3d(iris[,c(2,1,3)],pch=19,color=colores,type="h")
+
+scatterplot3d(iris[,c(2,1,3)],pch=25,color=colores,type="h",bg="blue")
+
+scatterplot3d(iris[,c(2,1,3)],pch=19,color="red",type="h")
+
+?scatterplot3d
 
 #########################################################################
 #################   Mapa de calor de correlaciones   ####################
@@ -251,13 +270,33 @@ scatterplot3d(iris[,c(2,1,3)],pch=19,color=colores)
 correlaciones = cor(iris[,1:4])
 correlaciones
 
-df = melt(correlaciones)
 
+df = melt(correlaciones)
+df
 colnames(df) = c("x","y","correlación")
 
-ggplot(df, aes(x = x, y = y, fill = correlación)) +
+df
+
+ggplot(data = df,mapping=aes(x = x, y = y, fill = correlación)) +
   geom_tile(color="white") +
-  geom_text(aes(label = round(correlación,2)), color = "white", size = 8) +
+  geom_text(mapping=aes(label = round(correlación,2)), color = "white", size = 8) +
+  scale_fill_gradient2(low="white",
+                       mid="orange", high="red",
+                       guide=guide_colorbar(ticks=FALSE,
+                                            barheight=5, limits=c(-1,1))) 
+
+ggplot(data = df) +
+  geom_tile(mapping=aes(x = x, y = y, fill = correlación),color="white") +
+  geom_text(mapping=aes(x=x, y=y,label = round(correlación,2)), color = "white", size = 8) +
+  scale_fill_gradient2(low="white",
+                       mid="orange", high="red",
+                       guide=guide_colorbar(ticks=FALSE,
+                                            barheight=5, limits=c(-1,1))) 
+
+
+ggplot(data = df) +
+  geom_tile(mapping=aes(x = x, y = y, fill = correlación),color="white") +
+#  geom_text(mapping=aes(x=x, y=y,label = round(correlación,2)), color = "white", size = 8) +
   scale_fill_gradient2(low="white",
                        mid="orange", high="red",
                        guide=guide_colorbar(ticks=FALSE,
@@ -269,13 +308,58 @@ ggplot(df, aes(x = x, y = y, fill = correlación)) +
 #######################   Coordenadas paralelas   #######################
 #########################################################################
 
+iris %>% colnames()
+
+
 ggparcoord(data = iris,
            columns = c(1,4,3,2),
            #alphaLines = 0.1,
-           boxplot = TRUE,
+           #boxplot = TRUE,
            groupColumn = "Species",           
-           showPoints = TRUE)  +
+           showPoints = TRUE) +
   scale_color_brewer(palette = "Set2") +
   theme(panel.background = element_rect("#202020"),
         panel.grid = element_blank(),
-        axis.title = element_blank())
+        axis.title = element_blank()) 
+
+
+
+medias = iris %>% group_by(Species) %>% summarize(Sepal.Length = mean(Sepal.Length),
+                                                  Sepal.Width = mean(Sepal.Width),
+                                                  Petal.Length = mean(Petal.Length),
+                                                  Petal.Width = mean(Petal.Width))
+
+medias
+
+
+medias = medias[,c(2,3,4,5,1)]
+
+iris = iris %>% mutate(tipo="flor")
+medias = medias %>% mutate(tipo="media")
+
+iris %>% names()
+medias %>% names()
+
+nva_iris = rbind(iris,medias)
+
+nva_iris
+
+
+?ggparcoord
+
+ggparcoord(data = nva_iris,
+           columns = c(1,4,3,2),
+           #alphaLines = 0.1,
+           #boxplot = TRUE,
+           groupColumn = "tipo",           
+           showPoints = TRUE) +
+  scale_color_brewer(palette = "Set2") +
+  theme(panel.background = element_rect("#202020"),
+        panel.grid = element_blank(),
+        axis.title = element_blank()) 
+
+
+
+
+iris %>% names()
+
