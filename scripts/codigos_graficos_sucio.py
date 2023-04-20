@@ -24,7 +24,7 @@ import numpy as np
 from siuba import *
 from plotnine import *
 import seaborn as sns
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt #matlab
 import plotly.express as px
 from pandas.plotting import parallel_coordinates
 
@@ -67,13 +67,13 @@ iris.columns
 
 #### Cambiar nombres a las columnas
 
-iris.columns
-
 iris = (iris >> rename(Sepal_Length = "Sepal.Length",
                Sepal_Width = "Sepal.Width",
                Petal_Length = "Petal.Length",
                Petal_Width = "Petal.Width")
 )
+
+#%%
 
 iris.columns
 
@@ -103,14 +103,6 @@ summarize(promedio=_.Sepal_Length.mean())
 #%%
 
 
-
-
-
-
-
-
-
-
 #%%
 #########################################################################
 ###############   Histogramas y densidades por columna   ################
@@ -123,7 +115,8 @@ summarize(promedio=_.Sepal_Length.mean())
 (ggplot(data=iris) +
   geom_histogram(mapping=aes(x="Sepal_Width"),
                  fill="red",
-                 color="white")
+                 color="white",
+                 bins=30)
 )
 
 #### Histograma relativo del ancho de sépalo sin distinguir especies
@@ -154,14 +147,38 @@ plt.hist(iris_pl_versicolor,alpha=0.5)
 
 ### Convertir la tabla iris a formato ordenado (tidy o largo)
 iris_ordenado = iris >> gather("Medida","Valor",-_["Species"])
+iris_ordenado
+'''1 setosa  sepal_length 5.1
+2 setosa  sepal_length 4.9
+...
+50 setosa 
+51 versicolor 
+
+100 versicolor
+101 virginicia
+...
+150 virginica sepal_length 5.9
+151 setosa sepal_width 3.5
+...
+300 virginia sepal_width 3.0
+301          petal_length 1.4
+
+450          petal_length 5.1
+451 setosa Petal_Width 0.2
+...
+600 virginica Petal_Width 1.8'''
+
+iris
+
+
+iris_ordenado
+
 
 (ggplot(data=iris_ordenado) +
       geom_histogram(mapping=aes(x="Valor"),
                      fill="red",
                      color="darkblue",
                      bins=30) +
-      labs(title = "Mi histograma",
-           subtitle = "Basado en Iris") +
       theme(
         panel_background = element_rect("black"), 
         panel_grid = element_blank(),
@@ -183,7 +200,6 @@ iris_ordenado = iris >> gather("Medida","Valor",-_["Species"])
 sns.distplot(iris_pl_setosa)
 sns.distplot(iris_pl_virginica)
 sns.distplot(iris_pl_versicolor)
-plt.show()
 
 #%%
 
@@ -237,9 +253,9 @@ setosa = iris >> filter(_.Species == "setosa")
 virginica = iris >> filter(_.Species == "virginica")
 
 sns.kdeplot(data=setosa, x="Sepal_Width",y="Sepal_Length",
-            cmap="Reds",fill=True,thresh=0.05)
+            cmap="Reds",fill=True,thresh=0.5)
 sns.kdeplot(data=virginica, x="Sepal_Width",y="Sepal_Length",
-            cmap="Blues",fill=True,thresh=0.05)
+            cmap="Oranges",fill=True,thresh=0.5)
 
 
 #########################################################################
@@ -247,6 +263,8 @@ sns.kdeplot(data=virginica, x="Sepal_Width",y="Sepal_Length",
 #########################################################################
 
 correlaciones = (iris >> select(-_.Species)).corr()
+
+correlaciones
 
 sns.heatmap(data=correlaciones,
             vmax=1,vmin=-1,
@@ -259,7 +277,7 @@ sns.heatmap(data=correlaciones,
 #######################   Coordenadas paralelas   #######################
 #########################################################################
 
-orden = ["Sepal_Length","Petal_Width","Petal_Length","Sepal_Width","Species"]
+orden = ["Sepal_Length","Sepal_Width","Petal_Length","Petal_Width","Species"]
 
 parallel_coordinates(iris[orden], "Species",colormap="cool")
 
