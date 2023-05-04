@@ -1,8 +1,13 @@
+###################################################################
+################ Análisis de componentes principales ##############
+################              ACP (PCA)              ##############
+###################################################################
+
 library(tidyverse)
 library(GGally)
 library(reshape)
 library(scatterplot3d) 
-library(factoextra)
+library(factoextra) # para utilizar el graficador de ACP
 
 estados <- as.data.frame(state.x77)
 
@@ -71,7 +76,6 @@ fviz_eig(componentes_principales)
 View(componentes_principales$scores)
 
 ## Mapa de calor de las nuevas correlaciones
-
 nvas_corr = cor(componentes_principales$scores)
 df = melt(nvas_corr)
 
@@ -91,9 +95,11 @@ primeras_tres = componentes_principales$scores[,1:3]
 
 scatterplot3d(primeras_tres,pch=19)
 
-##
+## Coordenadas de las antiguas variables en términos de las 
+## componentes principales
 
 componentes_principales$loadings
+
 
 ###################################################################
 ################## gráficas de las tres primeras cp ###############
