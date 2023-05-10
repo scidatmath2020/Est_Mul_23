@@ -13,12 +13,15 @@ library(class)
 
 
 iris_muestra = read.csv("iris_muestra.csv")
+iris_predicciones = read.csv("iris_prediccion.csv")
 
 ### Dividimos la tabla en las columnas numéricas y la columna
 ### de los grupos
 
 iris_muestra_X = iris_muestra[,1:4]
 iris_muestra_Y = iris_muestra[,5]
+
+View(iris_muestra_Y)
 
 ### Calculamos número de filas
 
@@ -38,6 +41,8 @@ ggpairs(data=iris_muestra,
 ### Preparamos los candidatos a número de vecinos k
 
 num_vecinos = 1:(sqrt(n)+1)
+
+num_vecinos
 
 ### Función que para cada K regresa una lista con tres elementos:
 ### 1: clasificación que la computadora hace con esos K vecinos
@@ -60,6 +65,10 @@ return(list(knn.clases,
 ### APlicamos la función anterior a todos nuestros candidatos a k
 resultados = lapply(num_vecinos,vecinos_cercanos)
 
+length(resultados)
+
+resultados[[8]]
+
 
 ### Obtenemos los errores cometidos en cada k
 
@@ -69,12 +78,21 @@ for(i in num_vecinos){
   errores = c(errores,resultados[[i]][[3]])
 }
 
+errores
+
 which(errores == min(errores))
+
+resultados[[8]][[2]]
+resultados[[11]][[2]]
+resultados[[12]][[2]]
+
+table(iris_muestra_Y)
+  
 
 
 ### Definimos nuestro k óptimo
 
-knn_optimo = 8 
+knn_optimo = 11 
 modelo_optimo = resultados[[knn_optimo]][[1]]
 resultados[[knn_optimo]][[2]]
 resultados[[knn_optimo]][[3]]
@@ -97,10 +115,26 @@ ggpairs(data=iris_resultados,
         axis.title = element_blank()
   )
 
+nva_iris = iris_predicciones[,-5]
+
+nva_iris
 
 
 
 
+# nva_flor es un vector de 4 elementos
+
+mis_distancias=function(x){
+  return(colSums(t(as.data.frame(matrix(unlist(rep(nva_iris[x,],n)),byrow=TRUE,nrow=n))-iris_muestra[,1:4])^2))       
+}
+
+iris_muestra[order(mis_distancias(10))[1:11],] 
+#### el renglón 9 es virginica
+
+iris_predicciones[10,]
+
+
+#####
 
 
 
